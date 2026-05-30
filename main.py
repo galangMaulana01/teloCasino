@@ -7,6 +7,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
@@ -26,11 +27,20 @@ AGENT_CODE = os.getenv("AGENT_CODE", "jumpapegas880")
 AGENT_TOKEN = os.getenv("AGENT_TOKEN", "4c7995b7856a5b0377149d48a47fd4b1")
 
 # JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this")
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
 app = FastAPI()
+
+# ========== CORS MIDDLEWARE (WAJIB UNTUK FRONTEND TERPISAH) ==========
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Untuk production, ganti dengan domain frontend Anda (misal: ["https://frontend.vercel.app"])
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Koneksi sync (pymongo)
 client = MongoClient(MONGO_URI)
