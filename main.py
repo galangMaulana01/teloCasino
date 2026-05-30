@@ -28,7 +28,7 @@ AGENT_CODE = os.getenv("AGENT_CODE")
 AGENT_TOKEN = os.getenv("AGENT_TOKEN")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 # Validasi environment variables wajib
@@ -211,7 +211,7 @@ async def game_list(provider: str = Query(..., description="Provider code")):
         return {"status": 0, "msg": "FAILED_LOAD_GAME", "raw": resp}
     return {"status": 1, "games": resp["games"]}
 
-@app.get("/game-launch", response_class=RedirectResponse)
+@app.get("/game-launch")   # Hapus response_class=RedirectResponse
 async def game_launch(
     provider: str = Query(...),
     game: str = Query(...),
@@ -230,5 +230,6 @@ async def game_launch(
     }
     resp = await call_telo_api("game_launch", payload)
     if resp.get("status") == 1 and resp.get("launch_url"):
-        return RedirectResponse(url=resp["launch_url"])
+        # Kembalikan JSON, bukan redirect
+        return {"launch_url": resp["launch_url"]}
     raise HTTPException(500, "FAILED_LAUNCH")
